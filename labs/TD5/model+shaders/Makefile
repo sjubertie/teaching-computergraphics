@@ -1,0 +1,30 @@
+
+SRCS=$(wildcard src/*.cpp)
+OBJS=$(SRCS:src/%.cpp=obj/%.o)
+
+BIN=bin/main
+
+SHADERS=$(wildcard res/shaders/*.glsl)
+
+LDLIBS=-lGL -lGLU -lglut -lGLEW
+
+all: check $(BIN)
+
+$(BIN): $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+obj/%.o: src/%.cpp
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+obj/%.o: src/%.cpp include/%.hpp
+
+check: $(SHADERS)
+	@for shader in $^; do glslangValidator $$shader; done
+
+run: check $(BIN)
+	./$(BIN)
+
+clean:
+	rm -f bin/* obj/*
+
+.PHONY: all check run clean
